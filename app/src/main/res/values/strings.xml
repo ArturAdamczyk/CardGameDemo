@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">CardGameDemo</string>
+    <string name="card_lay_off">Wyłożono karte na stół</string>
+    <string name="card_returned">Karta została zwrócona do talii</string>
+    <string name="card_obtained">Pobrano karte z talii</string>
+    <string name="card_deck_empty">W talii nie ma więcej kart</string>
+    <string name="player_cards_end">Użytkownik nie ma więcej kart</string>
+    <string name="unexpected_error">Niespodziewany błąd aplikacji</string>
+    <string name="game_restarted">Gra zrestartowana</string>
+    <string name="game_started">Gra rozpoczęta</string>
+
+    <string name="ace_club">As trefl</string>
+    <string name="king_club">Król trefl</string>
+    <string name="queen_club">Dama trefl</string>
+    <string name="jack_club">Walet trefl</string>
+    <string name="ten_club">Dziesiątka trefl</string>
+    <string name="nine_club">Dziewiątka trefl</string>
+    <string name="eight_club">Ósemka trefl</string>
+    <string name="seven_club">Siódemka trefl</string>
+    <string name="six_club">Szóstka trefl</string>
+    <string name="five_club">Piątka trefl</string>
+    <string name="four_club">Czwórka trefl</string>
+    <string name="three_club">Trójka trefl</string>
+    <string name="two_club">Dwójka trefl</string>
+
+    <string name="ace_diamond">As karo</string>
+    <string name="king_diamond">Król karo</string>
+    <string name="queen_diamond">Dama karo</string>
+    <string name="jack_diamond">Walet karo</string>
+    <string name="ten_diamond">Dziesiątka karo</string>
+    <string name="nine_diamond">Dziewiątka karo</string>
+    <string name="eight_diamond">Ósemka karo</string>
+    <string name="seven_diamond">Siódemka karo</string>
+    <string name="six_diamond">Szóstka karo</string>
+    <string name="five_diamond">Piątka karo</string>
+    <string name="four_diamond">Czwórka karo</string>
+    <string name="three_diamond">Trójka karo</string>
+    <string name="two_diamond">Dwójka karo</string>
+
+    <string name="ace_heart">As kier</string>
+    <string name="king_heart">Król kier</string>
+    <string name="queen_heart">Dama kier</string>
+    <string name="jack_heart">Walet kier</string>
+    <string name="ten_heart">Dziesiątka kier</string>
+    <string name="nine_heart">Dziewiątka kier</string>
+    <string name="eight_heart">Ósemka kier</string>
+    <string name="seven_heart">Siódemka kier</string>
+    <string name="six_heart">Szóstka kier</string>
+    <string name="five_heart">Piątka kier</string>
+    <string name="four_heart">Czwórka kier</string>
+    <string name="three_heart">Trójka kier</string>
+    <string name="two_heart">Dwójka kier</string>
+
+    <string name="ace_spade">As pik</string>
+    <string name="king_spade">Król pik</string>
+    <string name="queen_spade">Dama pik</string>
+    <string name="jack_spade">Walet pik</string>
+    <string name="ten_spade">Dziesiątka pik</string>
+    <string name="nine_spade">Dziewiątka pik</string>
+    <string name="eight_spade">Ósemka pik</string>
+    <string name="seven_spade">Siódemka pik</string>
+    <string name="six_spade">Szóstka pik</string>
+    <string name="five_spade">Piątka pik</string>
+    <string name="four_spade">Czwórka pik</string>
+    <string name="three_spade">Trójka pik</string>
+    <string name="two_spade">Dwójka pik</string>
+</resources>
