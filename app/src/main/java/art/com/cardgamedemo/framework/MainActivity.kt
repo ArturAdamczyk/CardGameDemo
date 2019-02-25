@@ -4,15 +4,12 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 import art.com.cardgamedemo.R
 import art.com.cardgamedemo.card_game.*
-import art.com.cardgamedemo.framework.Configs.POLISH_LOCALE
 import com.bumptech.glide.Glide
-import java.util.*
 import com.github.pwittchen.swipe.library.rx2.Swipe
 import com.github.pwittchen.swipe.library.rx2.SwipeEvent
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,6 +17,10 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
+import androidx.lifecycle.Observer
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 
 class MainActivity:
@@ -28,180 +29,124 @@ class MainActivity:
     GestureDetector.OnDoubleTapListener,
     TextToSpeech.OnInitListener {
 
-    private lateinit var gestureDetector: GestureDetectorCompat
-    private lateinit var textToSpeech: TextToSpeech
-    private val speakingQueue = LinkedList<String>()
-    private var swipe: Swipe = Swipe()
-    private lateinit var disposable: Disposable
-    private lateinit var cardGame: CardGame
+    private val gestureDetector: GestureDetectorCompat by inject { parametersOf(this@MainActivity, this@MainActivity) }
+    private val textToSpeech: TextToSpeech by inject { parametersOf( this@MainActivity) }
+    private val swipe: Swipe by inject()
+    private val viewModel: MainViewModel by viewModel()
     private val context: Context = this
+    private lateinit var disposable: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setupTextToSpeech()
         setupGestureDetector()
         setupGame()
+        viewModel.currentCard.observe(this, Observer {
+            loadCardImage(it.name)
+        })
+        viewModel.message.observe(this, Observer {
+            readTextAloud(it)
+        })
+        viewModel.cardMessage.observe(this, Observer {
+            readTextAloud(getCardName(it))
+        })
 
-            disposable = swipe.observe()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { swipeEvent ->
-                    try{
-                        when(swipeEvent) {
-                            SwipeEvent.SWIPED_LEFT -> run{
-                                readTextAloud(getCardName(cardGame.moveCurrentCardLeft()))
-                                loadCardImage(cardGame.getCurrentCard())
-                            }
-                            SwipeEvent.SWIPED_RIGHT -> run{
-                                readTextAloud(getCardName(cardGame.moveCurrentCardRight()))
-                                loadCardImage(cardGame.getCurrentCard())
-                            }
-                            SwipeEvent.SWIPED_UP -> run{
-                                cardGame.layOffCard()
-                                loadCardImage(cardGame.getCurrentCard())
-                                readTextAloud(getString(R.string.card_lay_off))
-                            }
-                            SwipeEvent.SWIPED_DOWN -> run{
-                                cardGame.restart(CardDecks().getDeck())
-                                loadCardImage(cardGame.getCurrentCard())
-                                readTextAloud(getString(R.string.game_restarted))
-                            }
-                        }
-                    }catch(e: CardGameException){
-                        when(e.message){
-                            CardGameExceptionType.EMPTY_DECK.name -> getString(R.string.card_deck_empty)
-                            CardGameExceptionType.EMPTY_DECK.name -> getString(R.string.player_cards_end)
-                            else -> getString(R.string.unexpected_error)
-                        }.apply{ Timber.e(this) }
-                    }
+        disposable = swipe.observe()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { swipeEvent ->
+                when(swipeEvent) {
+                    SwipeEvent.SWIPED_LEFT -> run{ viewModel.moveCurrentCardLeft() }
+                    SwipeEvent.SWIPED_RIGHT -> run{ viewModel.moveCurrentCardRight() }
+                    SwipeEvent.SWIPED_UP -> run{ viewModel.layOffCard() }
+                    //SwipeEvent.SWIPED_DOWN -> run{ viewModel.restart() }
+                    else -> {}
                 }
-
+            }
     }
 
     override fun onDestroy(){
+        super.onDestroy()
         with(textToSpeech) {
             stop()
             shutdown()
-        }
-        super.onDestroy()
-    }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        return swipe.dispatchTouchEvent(event) || super.dispatchTouchEvent(event)
+        }
+        disposable.dispose()
     }
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                override fun onDone(utteranceId: String) {
-                    if (!speakingQueue.isEmpty()) {
-                        textToSpeech.speak(speakingQueue.pop(), TextToSpeech.QUEUE_FLUSH, null, "")
-                    }
-                }
-                override fun onError(utteranceId: String) {}
-                override fun onStart(utteranceId: String) {}
-            })
-            readTextAloud(getString(R.string.game_started))
-        } else {
-            //logMessage(resources.getString(R.string.documentation_tts_not_available))
+            // tts is lazy injected by koin so onInit is not invoked until after first usage of textToSpeech object what results in the necessity to repeat it
+            readTextAloud(viewModel.message.value!!)
+        }else{
+            Timber.e(getString(R.string.tts_unavailable))
         }
     }
 
     override fun onDoubleTap(event: MotionEvent): Boolean {
-        cardGame.getNewCard()
-        readTextAloud(getString(R.string.card_obtained))
-        loadCardImage(cardGame.getCurrentCard())
+        viewModel.getNewCard()
         return true
     }
 
     override fun onLongPress(event: MotionEvent) {
-        cardGame.returnCard()
-        readTextAloud(getString(R.string.card_returned))
-        loadCardImage(cardGame.getCurrentCard())
+        viewModel.returnCard()
     }
 
     override fun onSingleTapConfirmed(event: MotionEvent): Boolean {
-        readTextAloud(getCardName(cardGame.getCurrentCard()))
+        readTextAloud(getCardName(viewModel.currentCard.value!!.name))
         return true
-    }
-
-    private fun setupTextToSpeech(){
-        textToSpeech = TextToSpeech(this, this)
-        textToSpeech.setLanguage(Locale(POLISH_LOCALE))
-    }
-
-    private fun setupGestureDetector(){
-        gestureDetector = GestureDetectorCompat(this, this)
-        gestureDetector.setOnDoubleTapListener(this)
-    }
-
-    private fun readTextAloud(msg: String) {
-        speakingQueue.add(msg)
-        textToSpeech.speak(speakingQueue.pop(), TextToSpeech.QUEUE_FLUSH, null, "")
-    }
-
-    private fun loadCardImage(card: Card){
-        CardHelper.resolveDrawable(card).apply {
-            if (this != CardDecks.EMPTY){
-                Glide.with(context).load(this).into(imageView)
-                //imageView.setImageDrawable(ContextCompat.getDrawable(context, this))
-            }else{
-                imageView.setImageDrawable(null)
-            }
-        }
-    }
-
-    private fun getCardName(card: Card): String{
-        CardHelper.resolveName(card).apply{
-            return if(this != CardHelper.EMPTY) getString(this) else ""
-        }
-    }
-
-    private fun setupGame(){
-        cardGame = CardGame(deckCards = CardDecks().getDeck())
-        cardGame.start()
-        loadCardImage(cardGame.getCurrentCard())
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (gestureDetector.onTouchEvent(event)) true else super.onTouchEvent(event)
     }
 
-
-
-
-    override fun onDown(event: MotionEvent): Boolean {
-        return true
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        return swipe.dispatchTouchEvent(event) || super.dispatchTouchEvent(event)
     }
 
-    override fun onFling(
-        event1: MotionEvent,
-        event2: MotionEvent,
-        velocityX: Float,
-        velocityY: Float
-    ): Boolean {
-        return true
+    private fun setupGestureDetector(){
+        gestureDetector.setOnDoubleTapListener(this)
     }
 
-    override fun onScroll(
-        event1: MotionEvent,
-        event2: MotionEvent,
-        distanceX: Float,
-        distanceY: Float
-    ): Boolean {
-        return true
+    private fun readTextAloud(msg: String) {
+        textToSpeech.speak(msg, TextToSpeech.QUEUE_FLUSH, null, "")
     }
 
-    override fun onDoubleTapEvent(event: MotionEvent): Boolean {
-        return true
+    private fun loadCardImage(cardType: String){
+        CardHelper.resolveDrawable(cardType).apply {
+            if (this != CardDecks.EMPTY)  Glide.with(context).load(this).into(imageView)
+            else imageView.setImageDrawable(null)
+        }
     }
+
+    private fun getCardName(cardType: String): String{
+        CardHelper.resolveName(cardType).apply{
+            return if(this != CardHelper.EMPTY) getString(this) else ""
+        }
+    }
+
+    private fun setupGame(){
+        viewModel.start()
+    }
+
+
+
+
+
+
+    override fun onDown(event: MotionEvent): Boolean = true
+
+    override fun onFling(event1: MotionEvent, event2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = true
+
+    override fun onScroll(event1: MotionEvent, event2: MotionEvent, distanceX: Float, distanceY: Float): Boolean = true
+
+    override fun onDoubleTapEvent(event: MotionEvent): Boolean = true
 
     override fun onShowPress(event: MotionEvent) {}
 
-    override fun onSingleTapUp(event: MotionEvent): Boolean {
-        return true
-    }
+    override fun onSingleTapUp(event: MotionEvent): Boolean = true
 }
 
 
