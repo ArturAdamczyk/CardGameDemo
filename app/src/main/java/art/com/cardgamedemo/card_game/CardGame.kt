@@ -13,10 +13,10 @@ class CardGame(
     private val deckCards: Queue<Card> = LinkedList(),
     private val tableCards: Stack<Card> = Stack(),
     private val playerCards: LinkedList<Card> = LinkedList(),
-    private val firstDealNumber: Int = GameConfig.firstLeadAmount
+    private val firstDealNumber: Int = GameConfig.FIRST_LEAD_AMOUNT
 ): CardGameActions {
     object GameConfig{
-        const val firstLeadAmount: Int = 4
+        const val FIRST_LEAD_AMOUNT: Int = 4
     }
 
     override fun start(): Completable {
