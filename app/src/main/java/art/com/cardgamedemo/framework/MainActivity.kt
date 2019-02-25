@@ -41,15 +41,9 @@ class MainActivity:
         setContentView(R.layout.activity_main)
         setupGestureDetector()
         setupGame()
-        viewModel.currentCard.observe(this, Observer {
-            loadCardImage(it.name)
-        })
-        viewModel.message.observe(this, Observer {
-            readTextAloud(it)
-        })
-        viewModel.cardMessage.observe(this, Observer {
-            readTextAloud(getCardName(it))
-        })
+        viewModel.currentCard.observe(this, Observer { loadCardImage(it.name) })
+        viewModel.message.observe(this, Observer { readTextAloud(it) })
+        viewModel.cardMessage.observe(this, Observer { readTextAloud(getCardName(it)) })
 
         disposable = swipe.observe()
             .subscribeOn(Schedulers.computation())
