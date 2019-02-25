@@ -1,15 +1,14 @@
 package art.com.cardgamedemo.framework
 
 import art.com.cardgamedemo.R
-import art.com.cardgamedemo.card_game.Card
 import art.com.cardgamedemo.card_game.CardDecks
 
 class CardHelper{
     companion object {
         const val EMPTY: Int = -1
 
-        fun resolveName(card: Card): Int {
-            return when (card.name) {
+        fun resolveName(cardType: String): Int {
+            return when (cardType) {
                 CardDecks.CardsType.ACE_CLUB.type -> R.string.ace_club
                 CardDecks.CardsType.KING_CLUB.type -> R.string.king_club
                 CardDecks.CardsType.QUEEN_CLUB.type -> R.string.queen_club
@@ -66,8 +65,8 @@ class CardHelper{
             }
         }
 
-        fun resolveDrawable(card: Card): Int {
-            return when (card.name) {
+        fun resolveDrawable(cardType: String): Int {
+            return when (cardType) {
                 CardDecks.CardsType.ACE_CLUB.type -> R.drawable.club_ace
                 CardDecks.CardsType.KING_CLUB.type -> R.drawable.club_king
                 CardDecks.CardsType.QUEEN_CLUB.type -> R.drawable.club_queen

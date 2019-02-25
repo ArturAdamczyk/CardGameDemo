@@ -4,10 +4,22 @@
     <string name="card_returned">Karta została zwrócona do talii</string>
     <string name="card_obtained">Pobrano karte z talii</string>
     <string name="card_deck_empty">W talii nie ma więcej kart</string>
-    <string name="player_cards_end">Użytkownik nie ma więcej kart</string>
-    <string name="unexpected_error">Niespodziewany błąd aplikacji</string>
+    <string name="player_cards_end">Nie masz więcej kart w ręku</string>
+
     <string name="game_restarted">Gra zrestartowana</string>
     <string name="game_started">Gra rozpoczęta</string>
+    <string name="tts_unavailable">Text to speech is not supported by this device</string>
+    <string name="polish_locale_unavailable">Polish locale is not supported by this device</string>
+
+    <string name="card_lay_off_error">Card lay off error</string>
+    <string name="card_returned_error">Card return error</string>
+    <string name="card_obtained_error">Card obtain error</string>
+    <string name="card_refresh_error">Card refresh error</string>
+    <string name="start_game_error">Game started error</string>
+    <string name="restart_game_error">Game restarted error</string>
+    <string name="card_move_left_error">Card move left error</string>
+    <string name="card_move_right_error">Card move right error</string>
+    <string name="unexpected_error">Niespodziewany błąd aplikacji</string>
 
     <string name="ace_club">As trefl</string>
     <string name="king_club">Król trefl</string>
